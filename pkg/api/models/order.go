@@ -1,78 +1,95 @@
-package model
+package models
 
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 )
 
 type Order struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"userId"`
-	TotalPrice int    `json:"totalPrice"`
-	Status     string `json:"status"`
+	ID         int     `json:"id"`
+	UserID     int     `json:"user_id"`
+	TotalPrice float64 `json:"total_price"`
+	Status     string  `json:"status"`
 }
 
 type OrderModel struct {
-	DB       *sql.DB
-	InfoLog  *log.Logger
-	ErrorLog *log.Logger
+	DB *sql.DB
 }
 
-func (m OrderModel) CreateOrder(order *Order) (int, error) {
+func (om OrderModel) Insert(order *Order) error {
 	query := `
-		INSERT INTO orders (user_id, total_price, status) 
-		VALUES ($1, $2, $3) 
-		RETURNING id
-	`
+        INSERT INTO orders (user_id, total_price, status) 
+        VALUES ($1, $2, $3) 
+        RETURNING id
+    `
+
 	args := []interface{}{order.UserID, order.TotalPrice, order.Status}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&order.ID)
+	err := om.DB.QueryRowContext(ctx, query, args...).Scan(&order.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (m OrderModel) GetOrder(id int) (*Order, error) {
+func (om OrderModel) Get(id int) (*Order, error) {
 	query := `
-		SELECT id, user_id, total_price, status
-		FROM orders
-		WHERE id = $1
-	`
+        SELECT id, user_id, total_price, status, created_at, updated_at
+        FROM orders
+        WHERE id = $1
+    `
+
 	var order Order
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	row := m.DB.QueryRowContext(ctx, query, id)
-	err := row.Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status)
+	err := om.DB.QueryRowContext(ctx, query, id).Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status)
 	if err != nil {
 		return nil, err
 	}
+
 	return &order, nil
 }
 
-func (m OrderModel) UpdateOrder(order *Order) error {
+func (om OrderModel) Update(order *Order) error {
 	query := `
-		UPDATE orders
-		SET user_id = $1, total_price = $2, status = $3
-		WHERE id = $4
-		RETURNING id
-	`
-	args := []interface{}{order.UserID, order.TotalPrice, order.Status, order.ID}
+        UPDATE orders
+        SET user_id = $2, total_price = $3, status = $4
+        WHERE id = $1
+    `
+
+	args := []interface{}{order.ID, order.UserID, order.TotalPrice, order.Status}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&order.ID)
+	_, err := om.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (m OrderModel) DeleteOrder(id int) error {
+func (om OrderModel) Delete(id int) error {
 	query := `
-		DELETE FROM orders
-		WHERE id = $1
-	`
+        DELETE FROM orders
+        WHERE id = $1
+    `
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, id)
-	return err
+	_, err := om.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

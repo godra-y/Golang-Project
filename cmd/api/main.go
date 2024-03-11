@@ -12,67 +12,81 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type App struct {
-	Router *mux.Router
-	DB     *sql.DB
-}
-
-func NewApp(db *sql.DB) *App {
-	return &App{
-		Router: mux.NewRouter(),
-		DB:     db,
+type config struct {
+	port string
+	env  string
+	db   struct {
+		dsn string
 	}
 }
 
-func (app *App) Initialize() {
-	app.initializeRoutes()
-}
-
-func (app *App) initializeRoutes() {
-	categoryModel := &models.CategoryModel{DB: app.DB}
-	productModel := &models.ProductModel{DB: app.DB}
-
-	categoryHandler := &handlers.CategoryHandler{CategoryModel: categoryModel}
-	productHandler := &handlers.ProductHandler{ProductModel: productModel}
-
-	// Categories
-	app.Router.HandleFunc("/api/v1/categories", categoryHandler.CreateCategory).Methods("POST")
-	app.Router.HandleFunc("/api/v1/categories/{id:[0-9]+}", categoryHandler.GetCategory).Methods("GET")
-	app.Router.HandleFunc("/api/v1/categories/{id:[0-9]+}", categoryHandler.UpdateCategory).Methods("PUT")
-	app.Router.HandleFunc("/api/v1/categories/{id:[0-9]+}", categoryHandler.DeleteCategory).Methods("DELETE")
-
-	// Products
-	app.Router.HandleFunc("/api/v1/products", productHandler.CreateProduct).Methods("POST")
-	app.Router.HandleFunc("/api/v1/products/{id:[0-9]+}", productHandler.GetProduct).Methods("GET")
-	app.Router.HandleFunc("/api/v1/products/{id:[0-9]+}", productHandler.UpdateProduct).Methods("PUT")
-	app.Router.HandleFunc("/api/v1/products/{id:[0-9]+}", productHandler.DeleteProduct).Methods("DELETE")
+type application struct {
+	config config
 }
 
 func main() {
-	var dbURI string
-	flag.StringVar(&dbURI, "db", "postgres://postgres:1@localhost:5432/data?sslmode=disable", "Database URI")
+	var cfg config
+	flag.StringVar(&cfg.port, "port", ":8080", "API server port")
+	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgresql://postgres:1@localhost/data_go?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
 
-	db, err := sql.Open("postgres", dbURI)
+	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal("Failed to connect to the database:", err)
+		log.Fatal(err)
+		return
 	}
-	defer func() {
-		if cerr := db.Close(); cerr != nil {
-			log.Fatal("Error closing the database connection:", cerr)
-		}
-	}()
+	defer db.Close()
 
-	app := NewApp(db)
-	app.Initialize()
+	app := &application{config: cfg}
 
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: app.Router,
+	categoryModel := models.CategoryModel{DB: db}
+	productModel := models.ProductModel{DB: db}
+	userModel := models.UserModel{DB: db}
+	orderModel := models.OrderModel{DB: db}
+
+	categoryHandler := &handlers.CategoryHandler{CategoryModel: categoryModel}
+	productHandler := &handlers.ProductHandler{ProductModel: productModel}
+	userHandler := &handlers.UserHandler{UserModel: userModel}
+	orderHandler := &handlers.OrderHandler{OrderModel: orderModel}
+
+	r := mux.NewRouter()
+
+	v1 := r.PathPrefix("/api/v1").Subrouter()
+
+	// Category routes
+	v1.HandleFunc("/categories", categoryHandler.CreateCategory).Methods("POST")
+	v1.HandleFunc("/categories/{id}", categoryHandler.GetCategory).Methods("GET")
+	v1.HandleFunc("/categories/{id}", categoryHandler.UpdateCategory).Methods("PUT")
+	v1.HandleFunc("/categories/{id}", categoryHandler.DeleteCategory).Methods("DELETE")
+
+	// Product routes
+	v1.HandleFunc("/products", productHandler.CreateProduct).Methods("POST")
+	v1.HandleFunc("/products/{id}", productHandler.GetProduct).Methods("GET")
+	v1.HandleFunc("/products/{id}", productHandler.UpdateProduct).Methods("PUT")
+	v1.HandleFunc("/products/{id}", productHandler.DeleteProduct).Methods("DELETE")
+
+	// User routes
+	v1.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	v1.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
+	v1.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
+	v1.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+
+	// Order routes
+	v1.HandleFunc("/orders", orderHandler.CreateOrder).Methods("POST")
+	v1.HandleFunc("/orders/{id}", orderHandler.GetOrder).Methods("GET")
+	v1.HandleFunc("/orders/{id}", orderHandler.UpdateOrder).Methods("PUT")
+	v1.HandleFunc("/orders/{id}", orderHandler.DeleteOrder).Methods("DELETE")
+
+	log.Printf("Starting server on %s\n", app.config.port)
+	err = http.ListenAndServe(app.config.port, r)
+	log.Fatal(err)
+}
+
+func openDB(cfg config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
 	}
-
-	log.Println("Server listening on port 8080...")
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal("Failed to start the server:", err)
-	}
+	return db, nil
 }
