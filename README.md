@@ -1,10 +1,10 @@
 #  Marvel online shop project
 
 ## Team members
-Moldash Dariya, 22B030560
-Bexeit Alua Armankyzy, 22B030283
-Muratova Alnura, 22B030399
-Izteleuova Arailym Altaikyzy, 22B030369
+Moldash Dariya 22B030560,
+Bexeit Alua Armankyzy 22B030283,
+Muratova Alnura 22B030399,
+Izteleuova Arailym Altaikyzy 22B030369
 
 ## Project description 
 Our project is an online shop specializing in the sale of comics, figures, clothing, and other products related to the world of Marvel. Users will be able to view the range of goods, add them to the basket, place orders, and track delivery status. Administrators will be able to manage the product catalog, user orders, and other aspects of the shop. 
