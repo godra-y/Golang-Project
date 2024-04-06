@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -14,7 +15,9 @@ type User struct {
 }
 
 type UserModel struct {
-	DB *sql.DB
+	DB       *sql.DB
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
 }
 
 func (um UserModel) Insert(user *User) error {

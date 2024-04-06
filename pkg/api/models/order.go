@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -14,7 +15,9 @@ type Order struct {
 }
 
 type OrderModel struct {
-	DB *sql.DB
+	DB       *sql.DB
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
 }
 
 func (om OrderModel) Insert(order *Order) error {

@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -16,6 +17,8 @@ type Product struct {
 
 type ProductModel struct {
 	DB *sql.DB
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
 }
 
 func (pm ProductModel) Insert(product *Product) error {

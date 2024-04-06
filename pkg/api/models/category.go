@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -12,7 +13,9 @@ type Category struct {
 }
 
 type CategoryModel struct {
-	DB *sql.DB
+	DB       *sql.DB
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
 }
 
 func (cm CategoryModel) Insert(category *Category) error {
