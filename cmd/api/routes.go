@@ -11,6 +11,10 @@ import (
 func (app *application) routes() http.Handler {
 	r := mux.NewRouter()
 
+	r.NotFoundHandler = http.HandlerFunc(app.notFoundResponse)
+
+	r.MethodNotAllowedHandler = http.HandlerFunc(app.methodNotAllowedResponse)
+
 	r.HandleFunc("/api/v1/healthcheck", app.healthcheckHandler).Methods("GET")
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
