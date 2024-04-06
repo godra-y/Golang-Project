@@ -39,7 +39,7 @@ func (om OrderModel) Insert(order *Order) error {
 
 func (om OrderModel) Get(id int) (*Order, error) {
 	query := `
-        SELECT id, user_id, total_price, status, created_at, updated_at
+        SELECT id, user_id, total_price, status
         FROM orders
         WHERE id = $1
     `
