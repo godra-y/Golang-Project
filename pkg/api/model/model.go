@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 
 var (
 	ErrRecordNotFound = errors.New("record not found")
-	
+
 	ErrEditConflict = errors.New("edit conflict")
 )
 

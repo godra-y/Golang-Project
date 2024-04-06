@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	_ "fmt"
+	"github.com/godra-y/go-project/pkg/api/model"
 	"log"
 	"net/http"
 	"os"
@@ -27,8 +28,8 @@ type config struct {
 
 type application struct {
 	config config
+	models model.Models
 	logger *log.Logger
-	db     *sql.DB
 }
 
 func main() {
@@ -49,8 +50,8 @@ func main() {
 
 	app := &application{
 		config: cfg,
+		models: model.NewModels(db),
 		logger: logger,
-		db:     db,
 	}
 
 	srv := &http.Server{
