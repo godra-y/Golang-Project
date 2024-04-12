@@ -14,10 +14,11 @@ var (
 )
 
 type Models struct {
-	User     UserModel
-	Order    OrderModel
-	Product  ProductModel
-	Category CategoryModel
+	User        UserModel
+	Product     ProductModel
+	Category    CategoryModel
+	Tokens      TokenModel
+	Permissions PermissionModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -29,17 +30,22 @@ func NewModels(db *sql.DB) Models {
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
 		},
-		Order: OrderModel{
-			DB:       db,
-			InfoLog:  infoLog,
-			ErrorLog: errorLog,
-		},
 		Product: ProductModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
 		},
 		Category: CategoryModel{
+			DB:       db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Tokens: TokenModel{
+			DB:       db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Permissions: PermissionModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,

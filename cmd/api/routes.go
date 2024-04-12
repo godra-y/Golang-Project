@@ -32,5 +32,10 @@ func (app *application) routes() http.Handler {
 	v1.HandleFunc("/products/{id}", app.deleteProductHandler).Methods("DELETE")
 	v1.HandleFunc("/categories/{id}/products", app.getProductsByCategoryHandler).Methods("GET")
 
-	return r
+	//User Routes
+	v1.HandleFunc("/users", app.registerUserHandler).Methods("POST")
+	v1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
+	v1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
+
+	return app.authenticate(r)
 }

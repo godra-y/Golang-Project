@@ -5,13 +5,11 @@ import (
 	"flag"
 	_ "fmt"
 	"github.com/godra-y/go-project/pkg/api/model"
-	"log"
-	"net/http"
-	"os"
-	"time"
-
-	"github.com/godra-y/go-project/pkg/api/vcs"
+	"github.com/godra-y/go-project/pkg/jsonlog"
+	"github.com/godra-y/go-project/pkg/vcs"
 	_ "github.com/lib/pq"
+	"os"
+	"sync"
 )
 
 var (
@@ -19,7 +17,7 @@ var (
 )
 
 type config struct {
-	port string
+	port int
 	env  string
 	db   struct {
 		dsn string
@@ -29,24 +27,31 @@ type config struct {
 type application struct {
 	config config
 	models model.Models
-	logger *log.Logger
+	logger *jsonlog.Logger
+	wg     sync.WaitGroup
 }
 
 func main() {
 	var cfg config
-	flag.StringVar(&cfg.port, "port", ":8080", "API server port")
+	flag.IntVar(&cfg.port, "port", 8080, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgresql://postgres:1@localhost/data_go?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
 
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
 
+	// Connect to DB
 	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.PrintError(err, nil)
 		return
 	}
-	defer db.Close()
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.PrintFatal(err, nil)
+		}
+	}()
 
 	app := &application{
 		config: cfg,
@@ -54,21 +59,17 @@ func main() {
 		logger: logger,
 	}
 
-	srv := &http.Server{
-		Addr:         cfg.port,
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+	if err := app.serve(); err != nil {
+		logger.PrintFatal(err, nil)
 	}
-
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
-	err = srv.ListenAndServe()
-	logger.Fatal(err)
 }
 
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}
