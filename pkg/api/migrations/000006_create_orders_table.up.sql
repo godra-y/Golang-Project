@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER,
+    quantity INTEGER NOT NULL,
+    created_at TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE SET NULL
+);
