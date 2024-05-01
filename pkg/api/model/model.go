@@ -19,6 +19,7 @@ type Models struct {
 	Category    CategoryModel
 	Tokens      TokenModel
 	Permissions PermissionModel
+	Order       OrderModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -36,6 +37,11 @@ func NewModels(db *sql.DB) Models {
 			ErrorLog: errorLog,
 		},
 		Category: CategoryModel{
+			DB:       db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Order: OrderModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,

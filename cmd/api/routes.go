@@ -32,6 +32,14 @@ func (app *application) routes() http.Handler {
 	v1.HandleFunc("/products/{id}", app.deleteProductHandler).Methods("DELETE")
 	v1.HandleFunc("/categories/{id}/products", app.getProductsByCategoryHandler).Methods("GET")
 
+	//Order routes
+	v1.HandleFunc("/orders", app.getOrdersList).Methods("GET")
+	v1.HandleFunc("/orders", app.createOrderHandler).Methods("POST")
+	v1.HandleFunc("/orders/{id}", app.getOrderHandler).Methods("GET")
+	v1.HandleFunc("/orders/{id}", app.updateOrderHandler).Methods("PUT")
+	v1.HandleFunc("/orders/{id}", app.deleteOrderHandler).Methods("DELETE")
+	v1.HandleFunc("/products/{id}/orders", app.getOrdersByProductHandler).Methods("GET")
+
 	//User Routes
 	v1.HandleFunc("/users", app.registerUserHandler).Methods("POST")
 	v1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")

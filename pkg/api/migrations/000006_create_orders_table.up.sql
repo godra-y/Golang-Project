@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     product_id INTEGER,
     quantity INTEGER NOT NULL,
