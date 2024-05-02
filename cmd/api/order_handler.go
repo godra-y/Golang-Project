@@ -62,7 +62,7 @@ func (app *application) getOrdersList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orders, metadata, err := app.models.Order.GetOrdersByProduct(input.ProductID, input.Filters)
+	orders, metadata, err := app.models.Order.GetAll(input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

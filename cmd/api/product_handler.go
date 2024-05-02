@@ -42,8 +42,7 @@ func (app *application) createProductHandler(w http.ResponseWriter, r *http.Requ
 func (app *application) getProductsList(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Title      string
-		PriceFrom  int
-		PriceTo    int
+		Price      int
 		CategoryId int
 		model.Filters
 	}
@@ -51,8 +50,7 @@ func (app *application) getProductsList(w http.ResponseWriter, r *http.Request) 
 	qs := r.URL.Query()
 
 	input.Title = app.readStrings(qs, "title", "")
-	input.PriceFrom = app.readInt(qs, "priceFrom", 0, v)
-	input.PriceTo = app.readInt(qs, "priceTo", 0, v)
+	input.Price = app.readInt(qs, "price", 0, v)
 	input.CategoryId = app.readInt(qs, "categoryId", 0, v)
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
@@ -69,7 +67,7 @@ func (app *application) getProductsList(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	products, metadata, err := app.models.Product.GetAll(input.Title, input.PriceFrom, input.PriceTo, input.CategoryId, input.Filters)
+	products, metadata, err := app.models.Product.GetAll(input.Title, input.Price, input.CategoryId, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

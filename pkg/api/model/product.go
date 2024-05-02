@@ -23,7 +23,7 @@ type ProductModel struct {
 	ErrorLog *log.Logger
 }
 
-func (pm ProductModel) GetAll(title string, from, to, id int, filters Filters) ([]*Product, Metadata, error) {
+func (pm ProductModel) GetAll(title string, price int, id int, filters Filters) ([]*Product, Metadata, error) {
 	query := fmt.Sprintf(
 		`
 		SELECT count(*) OVER(), id, title, description, price, category_id
