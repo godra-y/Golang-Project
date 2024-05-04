@@ -21,8 +21,6 @@ var (
 	version = vcs.Version()
 )
 
-var dbURL = "postgresql://postgres:1@8080/data_go?sslmode=require"
-
 type config struct {
 	port       int
 	env        string
@@ -93,7 +91,7 @@ func main() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dbURL)
+	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
 		return nil, err
 	}
