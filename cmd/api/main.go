@@ -45,7 +45,7 @@ func main() {
 		migrations = fs.String("migrations", "", "Path to migration files folder. If not provided, migrations do not applied")
 		port       = fs.Int("port", 8081, "API server port")
 		env        = fs.String("env", "development", "Environment (development|staging|production)")
-		dbDsn      = fs.String("dsn", "postgresql://postgres:1@localhost:5432/data_go?sslmode=disable", "PostgreSQL DSN")
+		dbDsn      = fs.String("dsn", "postgresql://postgres:1@mydatabase.render.com:5432/marvel", "PostgreSQL DSN")
 	)
 
 	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
