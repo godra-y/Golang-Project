@@ -17,4 +17,4 @@ services:
         sync: false
     buildFilter:
       paths:
-        - ./cmd/api
+        - app/**
