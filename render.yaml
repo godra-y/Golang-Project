@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: go
+    runtime: docker
+    plan: free
+    repo: https://github.com/godra-y/Golang-Project
+    region: frankfurt
+    branch: main
+    envVars:
+      - key: PORT
+        sync: false
+      - key: ENV
+        sync: false
+      - key: MIGRATIONS
+        sync: false
+      - key: DSN
+        sync: false
+    buildFilter:
+      paths:
+        - app/**
